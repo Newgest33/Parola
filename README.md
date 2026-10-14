@@ -13,6 +13,14 @@ npm test           # tests unitaires (SRS, tolérance aux fautes, série, conten
 PAROLA_TUTOR_MOCK=1 npm start && node tests/e2e.mjs http://localhost:8080   # parcours complet dans Chromium
 ```
 
+## Hébergement
+
+- **GitHub Pages** (automatique à chaque push, `.github/workflows/pages.yml`) : toute l'app sauf le tuteur IA, micro inclus.
+- **Vercel** (tuteur IA inclus) : importer le dépôt dans Vercel (New Project → Import `Newgest33/Parola`, aucun réglage à changer),
+  puis ajouter la variable d'environnement `ANTHROPIC_API_KEY`. Les fonctions `api/*.js` servent le tuteur ; `server.js` reste
+  pour le local.
+- La page de démo sur claude.ai ne peut pas utiliser le micro (le visualiseur le bloque) : les boutons 🎤 y sont désactivés avec un message.
+
 ## Tuteur IA (Léo)
 
 Onglet **Tuteur** : jeu de rôle en italien, espagnol ou luxembourgeois (café, gare, rencontre, marché, discussion libre).
