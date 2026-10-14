@@ -42,7 +42,7 @@ en français, encouragement, et une suggestion de ce que tu pourrais dire (bouto
 
 ## Animations
 
-Léo, spitz allemand blanc en SVG animé (`src/mascot.js` : respiration, clignements, queue qui remue, oreilles, langue ; états happy / sad / dance — touche-le : il dit une phrase), confettis à partir de 3 bonnes réponses d'affilée, combo 🔥, secousse sur erreur,
+Léo, le vrai spitz du propriétaire : trois photos détourées (`img/leo-*.webp`, pose de face = repos, regard levé = content, de profil = boudeur) animées en CSS (`src/mascot.js` : respiration, tête penchée, saut, boude, danse, confettis à partir de 3 bonnes réponses d'affilée, combo 🔥, secousse sur erreur,
 XP flottants, compteur d'XP animé, petits sons WebAudio (désactivables dans Réglages). Tout est coupé avec `prefers-reduced-motion`.
 
 ## Luxembourgeois

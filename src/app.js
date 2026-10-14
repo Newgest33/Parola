@@ -140,7 +140,7 @@ const CHEERS = ['Magnifique !', 'Roooar ! Parfait !', 'Tu gères !', 'Du premier
 const OOPS = ['Aïe… mais on apprend !', 'Même Léo se trompe de gamelle parfois.', 'Pas grave, on y revient !', 'Ouille ! Je le note pour plus tard.'];
 const pick = (a) => a[(Math.random() * a.length) | 0];
 function mascotBtn() {
-  const dog = mascot(64);
+  const dog = mascot(96);
   const b = h('button', { class: 'mascot', 'aria-label': 'Léo le spitz : touche-moi !', onclick: () => {
     const it = pick(L().items); react(dog, Math.random() < 0.25 ? 'dance' : 'happy', 1200); sfx('ok'); say(it.t);
     const r = b.getBoundingClientRect(); floatText(Math.random() < 0.3 ? 'Wouf !' : it.t, r.left + r.width / 2, r.bottom + 10, 'var(--brand)');
@@ -169,7 +169,7 @@ function learnView(due, weak) {
         h('div', { class: 'mute' }, `${s.known}/${u.items.length} appris`)));
   });
   const tutor = h('button', { class: 'unit tutorcta', onclick: () => { save.tab = 'tutor'; persist(); home(); } },
-    h('span', { class: 'emoji' }, mascot(44)), h('span', { class: 'grow' }, h('b', {}, 'Parler avec Léo'), h('div', { class: 'mute' }, 'Jeu de rôle avec un tuteur IA qui te corrige en douceur.')));
+    h('span', { class: 'emoji' }, mascot(56)), h('span', { class: 'grow' }, h('b', {}, 'Parler avec Léo'), h('div', { class: 'mute' }, 'Jeu de rôle avec un tuteur IA qui te corrige en douceur.')));
   return h('div', {}, actions, tutor, h('p', { class: 'mute' }, 'Toutes les unités sont libres d’accès : aucun verrou, aucune vie à perdre.'), ...units);
 }
 
@@ -391,7 +391,7 @@ function finish(e, it, body) {
       S.queue.splice(Math.min(S.i + 4, S.queue.length), 0, { it, step: 0 });
       S.total = S.queue.length;
     }
-    const dog = mascot(52, ok ? 'happy' : 'sad');
+    const dog = mascot(68, ok ? 'happy' : 'sad');
     if (ok) setTimeout(() => { dog.classList.remove('happy'); dog.classList.add('idle'); }, 900);
     const fb = h('div', { class: 'feedback ' + (ok ? 'good' : 'bad'), role: 'status' },
       h('div', { class: 'row' }, dog, h('b', { class: 'grow' }, ok ? pick(CHEERS) : pick(OOPS))),
