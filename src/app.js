@@ -1,4 +1,5 @@
 import { LANGS } from './content.js';
+import { tutorView } from './chat.js';
 import { confetti, floatText, sfx, bounce, fx } from './fx.js';
 import { checkTyped, review, newCard, mastery, shuffle, similarity, streak, dayKey, DAY, retention } from './lib.js';
 
@@ -67,13 +68,13 @@ function home() {
     h('button', { class: l.code === save.lang ? 'pill on' : 'pill', 'aria-pressed': String(l.code === save.lang),
       onclick: () => { save.lang = l.code; persist(); home(); } }, `${l.flag} ${l.name}`));
   const tabs = h('div', { class: 'tabs', role: 'tablist' },
-    ...[['learn', 'Apprendre'], ['stats', 'Progrès'], ['settings', 'Réglages']].map(([k, t]) =>
+    ...[['learn', 'Apprendre'], ['tutor', 'Tuteur'], ['stats', 'Progrès'], ['settings', 'Réglages']].map(([k, t]) =>
       h('button', { class: save.tab === k ? 'on' : '', role: 'tab', 'aria-selected': String(save.tab === k),
         onclick: () => { save.tab = k; persist(); home(); } }, t)));
   const head = h('div', { class: 'row between' },
     h('div', {}, h('div', { class: 'row' }, h('h1', {}, 'Parola'), mascotBtn()), h('div', { class: 'row wrap' }, ...langBtns)),
     h('div', { class: 'ring', style: `--p:${pct}`, title: 'Objectif du jour' }, h('span', {}, `${Math.min(today(), save.goal)}/${save.goal}`)));
-  mount(head, tabs, save.tab === 'stats' ? statsView() : save.tab === 'settings' ? settingsView() : learnView(due, weak));
+  mount(head, tabs, save.tab === 'stats' ? statsView() : save.tab === 'settings' ? settingsView() : save.tab === 'tutor' ? tutorView(tutorDeps()) : learnView(due, weak));
 }
 
 const CHEERS = ['Magnifique !', 'Roooar ! Parfait !', 'Tu gères !', 'Du premier coup !', 'Le lion est fier de toi 🦁', 'Ça, c’est du beau travail !', 'Incroyable !'];
@@ -86,6 +87,8 @@ function mascotBtn() {
   } }, '🦁');
   return b;
 }
+
+const tutorDeps = () => ({ h, L, get save() { return save; }, persist, say, listen, canSpeak, canListen, sfx, confetti });
 
 function learnView(due, weak) {
   const n = streak(save.days);
@@ -105,7 +108,9 @@ function learnView(due, weak) {
         h('div', { class: 'bar' }, h('i', { style: `width:${s.pct}%` })),
         h('div', { class: 'mute' }, `${s.known}/${u.items.length} appris`)));
   });
-  return h('div', {}, actions, h('p', { class: 'mute' }, 'Toutes les unités sont libres d’accès : aucun verrou, aucune vie à perdre.'), ...units);
+  const tutor = h('button', { class: 'unit tutorcta', onclick: () => { save.tab = 'tutor'; persist(); home(); } },
+    h('span', { class: 'emoji' }, '🦁'), h('span', { class: 'grow' }, h('b', {}, 'Parler avec Léo'), h('div', { class: 'mute' }, 'Jeu de rôle avec un tuteur IA qui te corrige en douceur.')));
+  return h('div', {}, actions, tutor, h('p', { class: 'mute' }, 'Toutes les unités sont libres d’accès : aucun verrou, aucune vie à perdre.'), ...units);
 }
 
 function statsView() {

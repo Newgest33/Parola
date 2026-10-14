@@ -24,6 +24,26 @@ export const LANGS = {
         ['A sinistra', 'À gauche'], ['Quanto costa il biglietto?', 'Combien coûte le billet ?'],
         ["A che ora parte il treno?", 'À quelle heure part le train ?'], ['È lontano da qui?', "C'est loin d'ici ?"],
         ['Cerco una farmacia', 'Je cherche une pharmacie'], ['Mi sono perso', 'Je me suis perdu'], ['Può aiutarmi?', 'Pouvez-vous m’aider ?'] ] },
+      { id: 'it5', title: 'Les nombres', emoji: '🔢', items: [
+        ['Uno, due, tre', 'Un, deux, trois'], ['Quattro, cinque, sei', 'Quatre, cinq, six'], ['Sette, otto, nove', 'Sept, huit, neuf'],
+        ['Dieci', 'Dix'], ['Venti euro', 'Vingt euros'], ['Cento', 'Cent'], ['Il primo', 'Le premier'],
+        ['La metà', 'La moitié'], ['Sono le tre', 'Il est trois heures'], ['Alle otto e mezza', 'À huit heures et demie'] ] },
+      { id: 'it6', title: 'La famille', emoji: '👨‍👩‍👧', items: [
+        ['Mia madre', 'Ma mère'], ['Mio padre', 'Mon père'], ['Ho un fratello', "J'ai un frère"], ['Ho due sorelle', "J'ai deux sœurs"],
+        ['I miei nonni', 'Mes grands-parents'], ['Mio marito', 'Mon mari'], ['Mia moglie', 'Ma femme'],
+        ['I nostri figli', 'Nos enfants'], ['Sono sposato', 'Je suis marié'], ['Ho un cane', "J'ai un chien"] ] },
+      { id: 'it7', title: 'Les courses', emoji: '🛒', items: [
+        ['Quanto costa?', 'Combien ça coûte ?'], ['È troppo caro', "C'est trop cher"], ['Posso pagare con la carta?', 'Je peux payer par carte ?'],
+        ['Un chilo di pomodori', 'Un kilo de tomates'], ['Mezzo chilo di pane', 'Une demi-livre de pain'], ['Avete una taglia più grande?', 'Avez-vous une taille plus grande ?'],
+        ['Lo prendo', 'Je le prends'], ['Solo guardo, grazie', 'Je regarde seulement, merci'], ['Lo scontrino, per favore', "Le ticket, s'il vous plaît"], ['È in saldo?', "C'est en solde ?"] ] },
+      { id: 'it8', title: 'Le temps qu’il fait', emoji: '🌦️', items: [
+        ['Che tempo fa?', 'Quel temps fait-il ?'], ['Fa caldo', 'Il fait chaud'], ['Fa freddo', 'Il fait froid'], ['Piove', 'Il pleut'],
+        ['C’è il sole', 'Il y a du soleil'], ['Nevica', 'Il neige'], ['Tira vento', 'Il y a du vent'],
+        ['Domani sarà bello', 'Demain il fera beau'], ['Prendi l’ombrello', 'Prends le parapluie'], ['Che bella giornata!', 'Quelle belle journée !'] ] },
+      { id: 'it9', title: 'Urgences & santé', emoji: '🚑', items: [
+        ['Aiuto!', 'Au secours !'], ['Chiami un medico', 'Appelez un médecin'], ['Mi sento male', 'Je me sens mal'], ['Ho mal di testa', "J'ai mal à la tête"],
+        ['Ho la febbre', "J'ai de la fièvre"], ['Sono allergico', 'Je suis allergique'], ['Dov’è l’ospedale?', "Où est l'hôpital ?"],
+        ['Ho perso il passaporto', "J'ai perdu mon passeport"], ['Chiami la polizia', 'Appelez la police'], ['Va tutto bene', 'Tout va bien'] ] },
     ],
   },
   es: {
@@ -49,6 +69,26 @@ export const LANGS = {
         ['A la izquierda', 'À gauche'], ['¿Cuánto cuesta el billete?', 'Combien coûte le billet ?'],
         ['¿A qué hora sale el tren?', 'À quelle heure part le train ?'], ['¿Está lejos de aquí?', "C'est loin d'ici ?"],
         ['Busco una farmacia', 'Je cherche une pharmacie'], ['Me he perdido', 'Je me suis perdu'], ['¿Puede ayudarme?', 'Pouvez-vous m’aider ?'] ] },
+      { id: 'es5', title: 'Les nombres', emoji: '🔢', items: [
+        ['Uno, dos, tres', 'Un, deux, trois'], ['Cuatro, cinco, seis', 'Quatre, cinq, six'], ['Siete, ocho, nueve', 'Sept, huit, neuf'],
+        ['Diez', 'Dix'], ['Veinte euros', 'Vingt euros'], ['Cien', 'Cent'], ['El primero', 'Le premier'],
+        ['La mitad', 'La moitié'], ['Son las tres', 'Il est trois heures'], ['A las ocho y media', 'À huit heures et demie'] ] },
+      { id: 'es6', title: 'La famille', emoji: '👨‍👩‍👧', items: [
+        ['Mi madre', 'Ma mère'], ['Mi padre', 'Mon père'], ['Tengo un hermano', "J'ai un frère"], ['Tengo dos hermanas', "J'ai deux sœurs"],
+        ['Mis abuelos', 'Mes grands-parents'], ['Mi marido', 'Mon mari'], ['Mi mujer', 'Ma femme'],
+        ['Nuestros hijos', 'Nos enfants'], ['Estoy casado', 'Je suis marié'], ['Tengo un perro', "J'ai un chien"] ] },
+      { id: 'es7', title: 'Les courses', emoji: '🛒', items: [
+        ['¿Cuánto cuesta?', 'Combien ça coûte ?'], ['Es demasiado caro', "C'est trop cher"], ['¿Puedo pagar con tarjeta?', 'Je peux payer par carte ?'],
+        ['Un kilo de tomates', 'Un kilo de tomates'], ['Medio kilo de pan', 'Une demi-livre de pain'], ['¿Tiene una talla más grande?', 'Avez-vous une taille plus grande ?'],
+        ['Me lo llevo', 'Je le prends'], ['Solo estoy mirando, gracias', 'Je regarde seulement, merci'], ['El tique, por favor', "Le ticket, s'il vous plaît"], ['¿Está de rebajas?', "C'est en solde ?"] ] },
+      { id: 'es8', title: 'Le temps qu’il fait', emoji: '🌦️', items: [
+        ['¿Qué tiempo hace?', 'Quel temps fait-il ?'], ['Hace calor', 'Il fait chaud'], ['Hace frío', 'Il fait froid'], ['Llueve', 'Il pleut'],
+        ['Hace sol', 'Il y a du soleil'], ['Nieva', 'Il neige'], ['Hace viento', 'Il y a du vent'],
+        ['Mañana hará bueno', 'Demain il fera beau'], ['Coge el paraguas', 'Prends le parapluie'], ['¡Qué día tan bonito!', 'Quelle belle journée !'] ] },
+      { id: 'es9', title: 'Urgences & santé', emoji: '🚑', items: [
+        ['¡Socorro!', 'Au secours !'], ['Llame a un médico', 'Appelez un médecin'], ['Me encuentro mal', 'Je me sens mal'], ['Me duele la cabeza', "J'ai mal à la tête"],
+        ['Tengo fiebre', "J'ai de la fièvre"], ['Soy alérgico', 'Je suis allergique'], ['¿Dónde está el hospital?', "Où est l'hôpital ?"],
+        ['He perdido el pasaporte', "J'ai perdu mon passeport"], ['Llame a la policía', 'Appelez la police'], ['Todo está bien', 'Tout va bien'] ] },
     ],
   },
   lb: {
@@ -74,9 +114,38 @@ export const LANGS = {
         ['Lénks', 'À gauche'], ['Wéi vill kascht d’Ticket?', 'Combien coûte le billet ?'], ['Wéini fiert den Zuch?', 'Quand part le train ?'],
         ['Ass et wäit vun hei?', "C'est loin d'ici ?"], ['Ech sichen eng Apdikt', 'Je cherche une pharmacie'],
         ['Ech sinn verluer gaangen', 'Je me suis perdu'], ['Kënnt Dir mir hëllefen?', 'Pouvez-vous m’aider ?'] ] },
+      { id: 'lb5', title: 'Les nombres', emoji: '🔢', items: [
+        ['Eent, zwee, dräi', 'Un, deux, trois'], ['Véier, fënnef, sechs', 'Quatre, cinq, six'], ['Siwen, aacht, néng', 'Sept, huit, neuf'],
+        ['Zéng', 'Dix'], ['Zwanzeg Euro', 'Vingt euros'], ['Honnert', 'Cent'], ['Deen éischten', 'Le premier'],
+        ['D’Hallschent', 'La moitié'], ['Et ass dräi Auer', 'Il est trois heures'], ['Um hallwer néng', 'À huit heures et demie'] ] },
+      { id: 'lb6', title: 'La famille', emoji: '👨‍👩‍👧', items: [
+        ['Meng Mamm', 'Ma mère'], ['Mäi Papp', 'Mon père'], ['Ech hunn e Brudder', "J'ai un frère"], ['Ech hunn zwou Schwësteren', "J'ai deux sœurs"],
+        ['Meng Grousselteren', 'Mes grands-parents'], ['Mäi Mann', 'Mon mari'], ['Meng Fra', 'Ma femme'],
+        ['Eis Kanner', 'Nos enfants'], ['Ech si bestuet', 'Je suis marié'], ['Ech hunn en Hond', "J'ai un chien"] ] },
+      { id: 'lb7', title: 'Les courses', emoji: '🛒', items: [
+        ['Wéi vill kascht dat?', 'Combien ça coûte ?'], ['Dat ass ze deier', "C'est trop cher"], ['Kann ech mat der Kaart bezuelen?', 'Je peux payer par carte ?'],
+        ['E Kilo Tomaten', 'Un kilo de tomates'], ['En halleft Kilo Brout', 'Une demi-livre de pain'], ['Hutt Dir eng méi grouss Gréisst?', 'Avez-vous une taille plus grande ?'],
+        ['Ech huelen et', 'Je le prends'], ['Ech kucken just, merci', 'Je regarde seulement, merci'], ['De Bong, wann ech gelift', "Le ticket, s'il vous plaît"], ['Ass dat am Solde?', "C'est en solde ?"] ] },
+      { id: 'lb8', title: 'Le temps qu’il fait', emoji: '🌦️', items: [
+        ['Wéi ass d’Wieder?', 'Quel temps fait-il ?'], ['Et ass waarm', 'Il fait chaud'], ['Et ass kal', 'Il fait froid'], ['Et reent', 'Il pleut'],
+        ['D’Sonn schéngt', 'Il y a du soleil'], ['Et schneit', 'Il neige'], ['Et ass wandeg', 'Il y a du vent'],
+        ['Muer gëtt et schéin', 'Demain il fera beau'], ['Huel de Prabbeli mat', 'Prends le parapluie'], ['Wat e schéinen Dag!', 'Quelle belle journée !'] ] },
+      { id: 'lb9', title: 'Urgences & santé', emoji: '🚑', items: [
+        ['Hëllef!', 'Au secours !'], ['Rufft en Dokter', 'Appelez un médecin'], ['Mir ass net gutt', 'Je me sens mal'], ['Ech hu Kappwéi', "J'ai mal à la tête"],
+        ['Ech hu Féiwer', "J'ai de la fièvre"], ['Ech sinn allergesch', 'Je suis allergique'], ['Wou ass d’Spidol?', "Où est l'hôpital ?"],
+        ['Ech hu mäi Pass verluer', "J'ai perdu mon passeport"], ['Rufft d’Police', 'Appelez la police'], ['Alles ass gutt', 'Tout va bien'] ] },
     ],
   },
 };
+
+// Scénarios de conversation pour le tuteur IA
+export const SCENARIOS = [
+  { id: 'cafe', emoji: '☕', title: 'Au café', brief: 'Tu entres dans un café. Le tuteur est le serveur : commande, demande l’addition.' },
+  { id: 'gare', emoji: '🚆', title: 'À la gare', brief: 'Tu dois acheter un billet et trouver ton quai. Le tuteur est le guichetier.' },
+  { id: 'rencontre', emoji: '🤝', title: 'Une rencontre', brief: 'Tu rencontres quelqu’un à une fête. Le tuteur est un invité curieux : présente-toi, pose des questions.' },
+  { id: 'marche', emoji: '🥕', title: 'Au marché', brief: 'Tu fais tes courses. Le tuteur est le marchand : demande les prix, négocie un peu.' },
+  { id: 'libre', emoji: '💬', title: 'Discussion libre', brief: 'Parle de ce que tu veux. Le tuteur suit la conversation et corrige en douceur.' },
+];
 
 // Normalisation : chaque item reçoit un id stable "unit:index"
 for (const [code, L] of Object.entries(LANGS)) {

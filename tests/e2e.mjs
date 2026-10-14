@@ -41,5 +41,17 @@ await p.click('text=Terminer');
 console.log('accueil après séance:', (await p.locator('.ring').textContent()).trim());
 await p.click('button:has-text("Progrès")'); console.log('stats ok:', await p.locator('.heat').count());
 await p.screenshot({ path: '/tmp/claude-0/stats.png' });
+// --- tuteur (serveur en PAROLA_TUTOR_MOCK=1) ---
+await p.click('button:has-text("Tuteur")');
+await p.waitForSelector('text=/simulé|Claude|non configuré/');
+await p.click('text=Au café');
+await p.waitForSelector('.msg.bot:not(.typing)', { timeout: 10000 });
+await p.fill('.chat input', 'grazi'); await p.press('.chat input', 'Enter');
+await p.waitForFunction(() => document.querySelectorAll('.msg.bot:not(.typing)').length >= 2, null, { timeout: 10000 });
+const corr = await p.locator('.corr b').first().textContent();
+console.log('tuteur: messages', await p.locator('.msg').count(), '| correction:', corr);
+await p.reload(); await p.click('button:has-text("Tuteur")');
+console.log('conversation restaurée après rechargement:', await p.locator('.msg').count() >= 3);
+await p.screenshot({ path: '/tmp/claude-0/tutor.png' });
 await b.close();
-process.exit(done && !errors.length ? 0 : 1);
+process.exit(done && !errors.length && corr === 'grazie' ? 0 : 1);

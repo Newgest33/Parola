@@ -6,10 +6,25 @@ PWA sans dépendances : fonctionne hors ligne, aucun compte, aucune pub, aucun p
 ## Lancer
 
 ```bash
+npm install
+export ANTHROPIC_API_KEY=sk-ant-...   # pour le tuteur IA (sinon l'onglet explique quoi faire)
 npm start          # http://localhost:8080
-npm test           # tests unitaires du moteur (SRS, tolérance aux fautes, série)
-node tests/e2e.mjs http://localhost:8080   # parcours complet dans Chromium (playwright)
+npm test           # tests unitaires (SRS, tolérance aux fautes, série, contenu, tuteur simulé)
+PAROLA_TUTOR_MOCK=1 npm start && node tests/e2e.mjs http://localhost:8080   # parcours complet dans Chromium
 ```
+
+## Tuteur IA (Léo)
+
+Onglet **Tuteur** : jeu de rôle en italien, espagnol ou luxembourgeois (café, gare, rencontre, marché, discussion libre).
+À chaque tour, Claude renvoie une réponse structurée : réplique du personnage, traduction (bouton 🇫🇷), corrections expliquées
+en français, encouragement, et une suggestion de ce que tu pourrais dire (bouton 💡). Dictée au micro quand le navigateur le permet.
+
+- Appel côté serveur (`src/tutor.js`, SDK officiel `@anthropic-ai/sdk`) : la clé ne transite jamais par le navigateur.
+- Modèle `claude-opus-5-5` par défaut (`PAROLA_MODEL` pour changer), effort `low` (réponses courtes, latence faible),
+  sortie structurée validée par un schéma Zod, prompt système mis en cache.
+- Repli serveur `fallbacks: "default"` activé : si les classificateurs de sécurité refusent une requête, elle est rejouée
+  automatiquement sur un autre modèle au lieu d'échouer.
+- `PAROLA_TUTOR_MOCK=1` : réponses simulées, pour la démo et les tests sans clé.
 
 ## Ce que Parola fait mieux
 
@@ -40,10 +55,11 @@ Le contenu doit être relu par un locuteur natif avant diffusion.
 - `src/lib.js` — logique pure : normalisation, distance d'édition, SRS, mémoire estimée, série.
 - `src/content.js` — contenu. Ajouter une langue ou une unité = ajouter des paires `[cible, français]`.
 - `src/fx.js` — confettis, texte flottant, sons.
+- `src/tutor.js` — appel Claude (serveur), schéma de réponse, prompt système. `src/chat.js` — interface du tuteur.
 - `src/app.js` — interface (DOM sans `innerHTML`), séances, exercices, synthèse/reconnaissance vocale (Web Speech API).
 - `sw.js` + `manifest.webmanifest` — installable et utilisable hors ligne.
 
 ## Pistes suivantes
 
-Tuteur conversationnel IA (API Claude) avec correction expliquée, plus de contenu/langues, synchronisation chiffrée entre appareils,
+Plus de contenu/langues, synchronisation chiffrée entre appareils,
 mode lecture (textes gradués), grammaire expliquée à la demande, voix neuronales hors ligne.
