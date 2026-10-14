@@ -47,6 +47,16 @@ function say(text, rate = 0.9) {
   if (v) u.voice = v;
   speechSynthesis.speak(u);
 }
+/** Léo parle en français (verdicts, consignes). Enchaîne après la synthèse en cours. */
+function sayFr(text, then) {
+  if (!hasTTS) { then?.(); return; }
+  const u = new SpeechSynthesisUtterance(text); u.lang = 'fr-FR'; u.rate = 1;
+  const v = speechSynthesis.getVoices().find((x) => x.lang.replace('_', '-').startsWith('fr'));
+  if (v) u.voice = v;
+  if (then) u.onend = then;
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
+}
+const micBlocked = () => location.hostname.endsWith('claude.ai'); // page de démo : le visualiseur refuse le micro
 function listen(onText, onEnd) {
   const r = new SR(); r.lang = L().voice; r.maxAlternatives = 3;
   r.onresult = (e) => onText([...e.results[0]].map((a) => a.transcript));
@@ -61,9 +71,9 @@ const tutorInfo = () => (tutorStatus ??= fetch('api/tutor/status').then((r) => r
 /** Widget réutilisable : 🔊 écouter, 🐢 lentement, 🎤 dire la phrase -> verdict, mots reconnus / ratés, conseils. */
 function pronounce(text, { onResult, intro = true } = {}) {
   const box = h('div', { class: 'pron' });
-  const noMic = !canListen();
+  const noMic = !canListen() || micBlocked();
   const mic = h('button', { class: 'speak mic', 'aria-label': 'Dire la phrase', disabled: noMic,
-    title: noMic ? (L().noVoice ? `La reconnaissance vocale ne couvre pas encore le ${L().name.toLowerCase()}.` : 'Reconnaissance vocale indisponible ici : utilise Chrome, Edge ou Safari.') : 'Dis la phrase' }, '🎤');
+    title: noMic ? (micBlocked() ? 'Le micro est bloqué dans cette page de démonstration : ouvre Parola sur son site pour parler.' : L().noVoice ? `La reconnaissance vocale ne couvre pas encore le ${L().name.toLowerCase()}.` : 'Reconnaissance vocale indisponible ici : utilise Chrome, Edge ou Safari.') : 'Dis la phrase' }, '🎤');
   const out = h('div', { class: 'pron-out', 'aria-live': 'polite' },
     intro ? h('span', { class: 'mute' }, noMic ? mic.title : 'Écoute, puis appuie sur le micro et répète.') : null);
   let errKind = null;
@@ -73,8 +83,8 @@ function pronounce(text, { onResult, intro = true } = {}) {
     listen((alts, err) => { got = alts; errKind = err; }, () => {
       mic.classList.remove('rec');
       if (!got.length) {
-        const why = errKind === 'not-allowed' ? 'Autorise le micro dans le navigateur.' : errKind === 'language-not-supported' ? 'Cette langue n’est pas reconnue par ton navigateur.' : 'Rien entendu. Réessaie, plus près du micro.';
-        out.replaceChildren(h('span', { class: 'mute' }, why)); return;
+        const why = errKind === 'not-allowed' || errKind === 'service-not-allowed' ? 'Le navigateur bloque le micro ici. Autorise-le (icône 🔒 dans la barre d’adresse) ou ouvre Parola sur son site.' : errKind === 'language-not-supported' ? 'Cette langue n’est pas reconnue par ton navigateur.' : errKind === 'network' ? 'La reconnaissance vocale a besoin d’Internet.' : 'Rien entendu. Réessaie, plus près du micro.';
+        out.replaceChildren(h('span', { class: 'ko' }, why)); sayFr(errKind ? 'Je n’ai pas accès au micro.' : 'Je n’ai rien entendu, réessaie.'); return;
       }
       const r = scoreSpeech(got, text); render(r); onResult?.(r);
     });
@@ -84,6 +94,10 @@ function pronounce(text, { onResult, intro = true } = {}) {
     const [label, cls] = pct >= 85 ? ['Parfait !', 'good'] : pct >= 65 ? ['Presque !', 'mid'] : ['À retravailler', 'bad'];
     const missed = r.words.filter((w) => !w.ok).map((w) => w.w);
     const tips = h('div', { class: 'pron-tips' });
+    // Léo répond à voix haute, puis redit la phrase si besoin
+    if (pct >= 85) sayFr(pick(['Exact !', 'Parfait, c’est ça !', 'Oui, exactement !']));
+    else if (pct >= 65) sayFr(`Presque ! Attention à ${missed.join(' et ')}. Écoute :`, () => say(text));
+    else sayFr('Pas tout à fait. Écoute bien et répète :', () => say(text));
     out.replaceChildren(...kids(
       h('div', { class: 'row wrap' }, h('span', { class: 'pill ' + cls }, `${label} ${pct} %`), h('span', { class: 'mute' }, `Compris : « ${r.heard} »`)),
       h('div', { class: 'pron-words' }, ...r.words.map((w) => h('span', { class: w.ok ? 'ok' : 'ko' }, w.w))),
