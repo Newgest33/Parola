@@ -91,11 +91,13 @@ function bubble(d, m) {
   const data = m.data || {};
   const corr = (data.corrections || []).map((c) => h('div', { class: 'corr' }, h('s', {}, c.original), ' → ', h('b', {}, c.corrected), h('div', { class: 'mute' }, c.explanation)));
   const tr = h('div', { class: 'mute trans', hidden: true }, data.translation || '');
+  const rep = h('div', { hidden: true }); let built = false;
   return h('div', { class: 'msg bot' },
     h('div', { class: 'row' }, d.mascot(36, (m.data?.corrections?.length ? 'idle' : 'idle')), h('div', { class: 'grow' }, m.content),
       canSpeak() ? h('button', { class: 'x', 'aria-label': 'Écouter', onclick: () => say(m.content) }, '🔊') : null,
-      data.translation ? h('button', { class: 'x', 'aria-label': 'Traduire', onclick: () => { tr.hidden = !tr.hidden; } }, '🇫🇷') : null),
-    tr,
+      data.translation ? h('button', { class: 'x', 'aria-label': 'Traduire', onclick: () => { tr.hidden = !tr.hidden; } }, '🇫🇷') : null,
+      h('button', { class: 'x', 'aria-label': 'Répéter à voix haute', onclick: () => { if (!built) { built = true; rep.append(d.pronounce(m.content, { intro: true })); } rep.hidden = !rep.hidden; } }, '🎤')),
+    tr, rep,
     data.praise ? h('div', { class: 'praise' }, '⭐ ', data.praise) : null,
     corr.length ? h('div', { class: 'corrs' }, h('b', {}, 'Petites corrections'), ...corr) : null);
 }

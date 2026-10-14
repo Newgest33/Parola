@@ -2,33 +2,43 @@
 // États : idle (vivant : respire, cligne, remue la queue), happy (saute, langue), sad (oreilles basses), dance.
 const SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" class="spitz" aria-hidden="true" focusable="false">
-  <ellipse class="sp-shadow" cx="60" cy="110" rx="30" ry="5" fill="#000" opacity=".08"/>
+  <defs>
+    <radialGradient id="fur" cx="45%" cy="38%" r="65%"><stop offset="0" stop-color="#ffffff"/><stop offset=".75" stop-color="#fbf8f2"/><stop offset="1" stop-color="#e9e2d6"/></radialGradient>
+    <radialGradient id="furD" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#f7f3ec"/><stop offset="1" stop-color="#ddd5c8"/></radialGradient>
+  </defs>
+  <ellipse class="sp-shadow" cx="60" cy="112" rx="30" ry="4.5" fill="#000" opacity=".08"/>
   <g class="sp-all">
     <g class="sp-tail">
-      <path d="M80 72 C 104 64, 106 36, 86 40 C 76 42, 78 56, 88 54" fill="#fff" stroke="#d6cfc4" stroke-width="2.5" stroke-linecap="round"/>
-      <circle cx="90" cy="42" r="6" fill="#fff"/><circle cx="98" cy="50" r="6" fill="#fff"/><circle cx="84" cy="52" r="6" fill="#fff"/>
+      <path d="M76 70 C 98 66, 110 40, 92 30 C 78 24, 70 40, 82 46" fill="none" stroke="url(#furD)" stroke-width="13" stroke-linecap="round"/>
+      <path d="M76 70 C 98 66, 110 40, 92 30 C 78 24, 70 40, 82 46" fill="none" stroke="url(#fur)" stroke-width="9" stroke-linecap="round"/>
+      <g fill="url(#fur)"><circle cx="100" cy="52" r="7"/><circle cx="102" cy="40" r="7"/><circle cx="94" cy="31" r="7"/><circle cx="84" cy="33" r="6"/><circle cx="96" cy="62" r="6"/></g>
     </g>
     <g class="sp-body">
-      <ellipse cx="60" cy="84" rx="33" ry="25" fill="#fff" stroke="#d6cfc4" stroke-width="2.5"/>
-      <g fill="#fff"><circle cx="30" cy="80" r="7"/><circle cx="34" cy="94" r="7"/><circle cx="90" cy="80" r="7"/><circle cx="86" cy="94" r="7"/><circle cx="45" cy="104" r="6"/><circle cx="75" cy="104" r="6"/></g>
-      <ellipse cx="44" cy="106" rx="10" ry="5" fill="#fff" stroke="#d6cfc4" stroke-width="2"/>
-      <ellipse cx="76" cy="106" rx="10" ry="5" fill="#fff" stroke="#d6cfc4" stroke-width="2"/>
-      <g stroke="#d6cfc4" stroke-width="1.5" stroke-linecap="round"><path d="M40 108v2M44 108v2M48 108v2M72 108v2M76 108v2M80 108v2"/></g>
+      <ellipse cx="60" cy="88" rx="28" ry="20" fill="url(#fur)"/>
+      <g fill="url(#fur)"><circle cx="35" cy="86" r="8"/><circle cx="38" cy="98" r="7"/><circle cx="85" cy="86" r="8"/><circle cx="82" cy="98" r="7"/></g>
+      <ellipse cx="47" cy="108" rx="9" ry="4.5" fill="url(#fur)"/><ellipse cx="73" cy="108" rx="9" ry="4.5" fill="url(#fur)"/>
+      <g stroke="#cfc6b8" stroke-width="1.4" stroke-linecap="round"><path d="M44 109.5v2M47.5 109.5v2M51 109.5v2M69 109.5v2M72.5 109.5v2M76 109.5v2"/></g>
     </g>
     <g class="sp-head">
-      <g class="sp-ear sp-ear-l"><path d="M34 44 L 28 14 L 52 32 Z" fill="#fff" stroke="#d6cfc4" stroke-width="2.5" stroke-linejoin="round"/><path d="M36 38 L 33 22 L 46 32 Z" fill="#f6b6c4"/></g>
-      <g class="sp-ear sp-ear-r"><path d="M86 44 L 92 14 L 68 32 Z" fill="#fff" stroke="#d6cfc4" stroke-width="2.5" stroke-linejoin="round"/><path d="M84 38 L 87 22 L 74 32 Z" fill="#f6b6c4"/></g>
-      <ellipse cx="60" cy="62" rx="31" ry="22" fill="#fff"/>
-      <g fill="#fff"><circle cx="31" cy="58" r="8"/><circle cx="36" cy="70" r="8"/><circle cx="89" cy="58" r="8"/><circle cx="84" cy="70" r="8"/><circle cx="50" cy="80" r="7"/><circle cx="70" cy="80" r="7"/></g>
-      <circle cx="60" cy="48" r="25" fill="#fff" stroke="#d6cfc4" stroke-width="2.5"/>
-      <g fill="#fff"><circle cx="38" cy="40" r="6"/><circle cx="82" cy="40" r="6"/><circle cx="60" cy="24" r="6"/><circle cx="48" cy="27" r="6"/><circle cx="72" cy="27" r="6"/></g>
-      <circle class="sp-blush" cx="42" cy="56" r="5" fill="#f6b6c4" opacity=".55"/><circle class="sp-blush" cx="78" cy="56" r="5" fill="#f6b6c4" opacity=".55"/>
-      <g class="sp-eye" transform="translate(49 46)"><circle r="4.2" fill="#2b2118"/><circle cx="1.4" cy="-1.4" r="1.3" fill="#fff"/><rect class="sp-lid" x="-5" y="-5" width="10" height="10" fill="#fff"/></g>
-      <g class="sp-eye" transform="translate(71 46)"><circle r="4.2" fill="#2b2118"/><circle cx="1.4" cy="-1.4" r="1.3" fill="#fff"/><rect class="sp-lid" x="-5" y="-5" width="10" height="10" fill="#fff"/></g>
-      <g class="sp-brows" stroke="#b9b0a4" stroke-width="2" stroke-linecap="round" fill="none"><path class="sp-brow-l" d="M43 37 q 6 -3 11 0"/><path class="sp-brow-r" d="M66 37 q 5 -3 11 0"/></g>
-      <path class="sp-nose" d="M55 56 h10 l-5 5 z" fill="#2b2118" stroke="#2b2118" stroke-width="2" stroke-linejoin="round"/>
-      <path class="sp-mouth" d="M60 61 q -3 5 -8 3 M60 61 q 3 5 8 3" fill="none" stroke="#2b2118" stroke-width="2" stroke-linecap="round"/>
-      <ellipse class="sp-tongue" cx="60" cy="68" rx="4.5" ry="5" fill="#f06595"/>
+      <g class="sp-ear sp-ear-l"><path d="M41 33 L 38 11 L 57 27 Z" fill="url(#fur)" stroke="#e4ddd0" stroke-width="1.5" stroke-linejoin="round"/><path d="M43 30 L 41.5 17 L 52 27 Z" fill="#f3b5c2"/></g>
+      <g class="sp-ear sp-ear-r"><path d="M79 33 L 82 11 L 63 27 Z" fill="url(#fur)" stroke="#e4ddd0" stroke-width="1.5" stroke-linejoin="round"/><path d="M77 30 L 78.5 17 L 68 27 Z" fill="#f3b5c2"/></g>
+      <g class="sp-ruff" fill="url(#fur)">
+        <circle cx="28" cy="62" r="11"/><circle cx="92" cy="62" r="11"/><circle cx="31" cy="76" r="10"/><circle cx="89" cy="76" r="10"/>
+        <circle cx="40" cy="84" r="10"/><circle cx="80" cy="84" r="10"/><circle cx="52" cy="88" r="9"/><circle cx="68" cy="88" r="9"/><circle cx="60" cy="89" r="9"/>
+        <circle cx="33" cy="50" r="9"/><circle cx="87" cy="50" r="9"/>
+      </g>
+      <ellipse cx="60" cy="68" rx="32" ry="19" fill="url(#fur)"/>
+      <ellipse cx="60" cy="70" rx="18" ry="10" fill="#efe9de" opacity=".6"/>
+      <ellipse cx="60" cy="46" rx="24" ry="21" fill="url(#fur)"/>
+      <g fill="url(#fur)"><circle cx="37" cy="44" r="9"/><circle cx="83" cy="44" r="9"/><circle cx="36" cy="55" r="8"/><circle cx="84" cy="55" r="8"/><circle cx="60" cy="27" r="7"/><circle cx="50" cy="29" r="6"/><circle cx="70" cy="29" r="6"/></g>
+      <ellipse cx="60" cy="57" rx="12" ry="8.5" fill="#fff"/>
+      <circle class="sp-blush" cx="43" cy="56" r="4.5" fill="#f3b5c2" opacity=".6"/><circle class="sp-blush" cx="77" cy="56" r="4.5" fill="#f3b5c2" opacity=".6"/>
+      <g class="sp-eye" transform="translate(50 45)"><circle r="4" fill="#2a2019"/><circle cx="1.4" cy="-1.4" r="1.4" fill="#fff"/><circle cx="-1.2" cy="1.4" r=".6" fill="#fff" opacity=".7"/><rect class="sp-lid" x="-5" y="-5" width="10" height="10" fill="url(#fur)"/></g>
+      <g class="sp-eye" transform="translate(70 45)"><circle r="4" fill="#2a2019"/><circle cx="1.4" cy="-1.4" r="1.4" fill="#fff"/><circle cx="-1.2" cy="1.4" r=".6" fill="#fff" opacity=".7"/><rect class="sp-lid" x="-5" y="-5" width="10" height="10" fill="url(#fur)"/></g>
+      <g class="sp-brows" stroke="#b9b0a4" stroke-width="2" stroke-linecap="round" fill="none"><path class="sp-brow-l" d="M45 37 q 5 -3 10 0"/><path class="sp-brow-r" d="M65 37 q 5 -3 10 0"/></g>
+      <path class="sp-nose" d="M56 53.5 h8 q1 0 .5 1 l-3.5 4 q-1 1 -2 0 l-3.5 -4 q-.5 -1 .5 -1 z" fill="#2a2019"/><circle cx="58" cy="54.5" r=".9" fill="#fff" opacity=".6"/>
+      <path class="sp-mouth" d="M60 58.5 q -3 4.5 -7.5 2.5 M60 58.5 q 3 4.5 7.5 2.5" fill="none" stroke="#2a2019" stroke-width="1.8" stroke-linecap="round"/>
+      <ellipse class="sp-tongue" cx="60" cy="64" rx="4" ry="4.5" fill="#f06595"/>
     </g>
   </g>
 </svg>`;

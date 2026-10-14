@@ -4,7 +4,7 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { askTutor, MODEL } from './src/tutor.js';
+import { askTutor, coachPronunciation, MODEL } from './src/tutor.js';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
@@ -27,6 +27,12 @@ async function api(req, res, path) {
     const body = await readJson(req);
     if (!body || typeof body.lang !== 'string' || !body.scenario || !Array.isArray(body.messages)) return json(res, 400, { error: 'Requête invalide' });
     return json(res, 200, await askTutor(body));
+  }
+  if (path === '/api/pronounce' && req.method === 'POST') {
+    if (!tutorReady) return json(res, 503, { error: 'Tuteur non configuré : définis ANTHROPIC_API_KEY sur le serveur.' });
+    const b = await readJson(req);
+    if (!b || typeof b.lang !== 'string' || typeof b.target !== 'string' || typeof b.heard !== 'string' || !Array.isArray(b.missed)) return json(res, 400, { error: 'Requête invalide' });
+    return json(res, 200, await coachPronunciation({ lang: b.lang, target: b.target.slice(0, 200), heard: b.heard.slice(0, 300), missed: b.missed.slice(0, 10).map(String) }));
   }
   json(res, 404, { error: 'Introuvable' });
 }

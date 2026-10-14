@@ -20,3 +20,8 @@ test('askTutor (mock) : réponse conforme au schéma, corrige « grazi »', asyn
   assert.equal(r.corrections[0].corrected, 'grazie');
   await assert.rejects(askTutor({ lang: 'it', scenario: SCENARIOS[0], messages: [] }, { mock: true }), /vide/);
 });
+import { coachPronunciation, Coaching } from '../src/tutor.js';
+test('coachPronunciation (mock) : conforme au schéma, vise le mot raté', async () => {
+  const r = await coachPronunciation({ lang: 'it', target: 'Il conto, per favore', heard: 'il conto per piacere', missed: ['favore'] }, { mock: true });
+  Coaching.parse(r); assert.match(r.tips[0], /favore/);
+});

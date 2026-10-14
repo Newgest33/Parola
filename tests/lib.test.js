@@ -39,3 +39,13 @@ test('similarity & shuffle', () => {
   assert.ok(similarity('Buon giorno', 'buongiorno') > 0.85);
   assert.equal(shuffle([1, 2, 3, 4, 5]).sort().join(), '1,2,3,4,5');
 });
+
+import { scoreSpeech } from '../src/lib.js';
+test('scoreSpeech : mots reconnus, meilleure hypothèse, tolérance', () => {
+  const r = scoreSpeech(['come stai', 'comme stai'], 'Come stai?');
+  assert.ok(r.score > 0.95); assert.deepEqual(r.words.map((w) => w.ok), [true, true]);
+  const p = scoreSpeech(['il conto per piacere'], 'Il conto, per favore');
+  assert.deepEqual(p.words.map((w) => w.ok), [true, true, true, false]); assert.ok(p.score > 0.6 && p.score < 0.9);
+  assert.equal(scoreSpeech([], 'Ciao').score, 0);
+  assert.ok(scoreSpeech(['buon giorno'], 'Buongiorno').score > 0.3);
+});

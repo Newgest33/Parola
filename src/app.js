@@ -2,7 +2,7 @@ import { LANGS } from './content.js';
 import { tutorView } from './chat.js';
 import { mascot, react } from './mascot.js';
 import { confetti, floatText, sfx, bounce, fx } from './fx.js';
-import { checkTyped, review, newCard, mastery, shuffle, similarity, streak, dayKey, DAY, retention } from './lib.js';
+import { checkTyped, review, newCard, mastery, shuffle, similarity, streak, dayKey, DAY, retention, scoreSpeech } from './lib.js';
 
 /* ---------- état persistant (100 % local, exportable) ---------- */
 const KEY = 'parola.v1';
@@ -29,7 +29,8 @@ function h(tag, props = {}, ...kids) {
   for (const kid of kids.flat()) if (kid != null && kid !== false) el.append(kid.nodeType ? kid : document.createTextNode(kid));
   return el;
 }
-const mount = (...nodes) => { root.replaceChildren(...nodes); window.scrollTo(0, 0); };
+const kids = (...a) => a.filter((x) => x != null && x !== false); // replaceChildren(null) afficherait « null »
+const mount = (...nodes) => { root.replaceChildren(...kids(...nodes)); window.scrollTo(0, 0); };
 
 /* ---------- voix : synthèse + reconnaissance (si le navigateur le permet) ---------- */
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -37,11 +38,11 @@ const hasTTS = 'speechSynthesis' in window;
 // Voix réellement disponible pour la langue courante (sinon exercices audio/parole désactivés)
 const canSpeak = () => hasTTS && !L().noVoice && (() => { const vs = speechSynthesis.getVoices(); return !vs.length || vs.some((v) => v.lang.replace('_', '-').startsWith(L().voice.slice(0, 2))); })();
 const canListen = () => !!SR && !L().noVoice;
-function say(text) {
+function say(text, rate = 0.9) {
   if (!canSpeak()) return;
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = L().voice; u.rate = 0.9;
+  u.lang = L().voice; u.rate = rate;
   const v = speechSynthesis.getVoices().find((x) => x.lang.replace('_', '-').startsWith(L().voice.slice(0, 2)));
   if (v) u.voice = v;
   speechSynthesis.speak(u);
@@ -49,8 +50,65 @@ function say(text) {
 function listen(onText, onEnd) {
   const r = new SR(); r.lang = L().voice; r.maxAlternatives = 3;
   r.onresult = (e) => onText([...e.results[0]].map((a) => a.transcript));
-  r.onerror = () => onText([]); r.onend = onEnd; r.start();
+  r.onerror = (e) => onText([], e.error); r.onend = onEnd; r.start();
   return r;
+}
+
+/* ---------- prononciation : écouter, dire, score mot à mot, conseils de Léo ---------- */
+let tutorStatus;
+const tutorInfo = () => (tutorStatus ??= fetch('api/tutor/status').then((r) => r.json()).catch(() => ({ ready: false })));
+
+/** Widget réutilisable : 🔊 écouter, 🐢 lentement, 🎤 dire la phrase -> verdict, mots reconnus / ratés, conseils. */
+function pronounce(text, { onResult, intro = true } = {}) {
+  const box = h('div', { class: 'pron' });
+  const noMic = !canListen();
+  const mic = h('button', { class: 'speak mic', 'aria-label': 'Dire la phrase', disabled: noMic,
+    title: noMic ? (L().noVoice ? `La reconnaissance vocale ne couvre pas encore le ${L().name.toLowerCase()}.` : 'Reconnaissance vocale indisponible ici : utilise Chrome, Edge ou Safari.') : 'Dis la phrase' }, '🎤');
+  const out = h('div', { class: 'pron-out', 'aria-live': 'polite' },
+    intro ? h('span', { class: 'mute' }, noMic ? mic.title : 'Écoute, puis appuie sur le micro et répète.') : null);
+  let errKind = null;
+  mic.onclick = () => {
+    mic.classList.add('rec'); let got = [];
+    out.replaceChildren(h('span', { class: 'mute' }, 'Je t’écoute… dis : ', h('b', {}, text)));
+    listen((alts, err) => { got = alts; errKind = err; }, () => {
+      mic.classList.remove('rec');
+      if (!got.length) {
+        const why = errKind === 'not-allowed' ? 'Autorise le micro dans le navigateur.' : errKind === 'language-not-supported' ? 'Cette langue n’est pas reconnue par ton navigateur.' : 'Rien entendu. Réessaie, plus près du micro.';
+        out.replaceChildren(h('span', { class: 'mute' }, why)); return;
+      }
+      const r = scoreSpeech(got, text); render(r); onResult?.(r);
+    });
+  };
+  function render(r) {
+    const pct = Math.round(r.score * 100);
+    const [label, cls] = pct >= 85 ? ['Parfait !', 'good'] : pct >= 65 ? ['Presque !', 'mid'] : ['À retravailler', 'bad'];
+    const missed = r.words.filter((w) => !w.ok).map((w) => w.w);
+    const tips = h('div', { class: 'pron-tips' });
+    out.replaceChildren(...kids(
+      h('div', { class: 'row wrap' }, h('span', { class: 'pill ' + cls }, `${label} ${pct} %`), h('span', { class: 'mute' }, `Compris : « ${r.heard} »`)),
+      h('div', { class: 'pron-words' }, ...r.words.map((w) => h('span', { class: w.ok ? 'ok' : 'ko' }, w.w))),
+      missed.length ? h('div', { class: 'mute' }, 'Réécoute 🔊 et réessaie les mots en rouge.') : null, tips));
+    if (pct < 85) coach(text, r, missed, tips);
+  }
+  box.append(h('div', { class: 'row' },
+    canSpeak() ? h('button', { class: 'speak', 'aria-label': 'Écouter', onclick: () => say(text) }, '🔊') : null,
+    canSpeak() ? h('button', { class: 'speak', 'aria-label': 'Écouter lentement', onclick: () => say(text, 0.55) }, '🐢') : null,
+    mic), out);
+  return box;
+}
+
+/** Conseils de prononciation par le tuteur (si le serveur est là), à partir de ce que le micro a compris. */
+async function coach(target, r, missed, el) {
+  const st = await tutorInfo(); if (!st.ready) return;
+  el.replaceChildren(h('span', { class: 'mute' }, 'Léo prépare un conseil…'));
+  try {
+    const res = await fetch('api/pronounce', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lang: save.lang, target, heard: r.heard, missed }) });
+    const d = await res.json(); if (!res.ok) throw new Error(d.error);
+    el.replaceChildren(h('div', { class: 'row' }, mascot(36), h('div', { class: 'grow' },
+      d.phonetic ? h('div', {}, 'Ça se dit à peu près : ', h('b', {}, d.phonetic)) : null,
+      ...d.tips.map((t) => h('div', {}, '• ', t)))));
+  } catch { el.replaceChildren(); }
 }
 
 /* ---------- accueil ---------- */
@@ -90,7 +148,7 @@ function mascotBtn() {
   return b;
 }
 
-const tutorDeps = () => ({ h, L, mascot, react, twoStep, get save() { return save; }, persist, say, listen, canSpeak, canListen, sfx, confetti });
+const tutorDeps = () => ({ h, L, mascot, react, twoStep, pronounce, get save() { return save; }, persist, say, listen, canSpeak, canListen, sfx, confetti });
 
 function learnView(due, weak) {
   const n = streak(save.days);
@@ -212,8 +270,8 @@ function next() {
 function introCard(it, body, go) {
   say(it.t);
   body.append(h('p', { class: 'mute' }, 'Nouvelle phrase'),
-    h('div', { class: 'card center' }, h('div', { class: 'big' }, it.t), h('div', {}, it.f),
-      canSpeak() ? h('button', { class: 'speak', 'aria-label': 'Écouter', onclick: () => say(it.t) }, '🔊') : null),
+    h('div', { class: 'card center' }, h('div', { class: 'big' }, it.t), h('div', {}, it.f)),
+    h('div', { class: 'card' }, h('b', {}, 'À toi de la dire'), pronounce(it.t, { onResult: (r) => { if (r.score >= 0.85) { sfx('ok'); save.xp += 2; persist(); } } })),
     h('div', { class: 'footer' }, h('button', { class: 'primary', onclick: go }, 'Compris')));
 }
 
@@ -297,20 +355,14 @@ function textInput(body, top, it, done, extra) {
   setTimeout(() => input.focus(), 50);
 }
 function speakEx(it, body, done) {
-  const mic = h('button', { class: 'speak mic', 'aria-label': 'Parler' }, '🎤');
   const skip = h('button', { onclick: () => { body.replaceChildren(); typeEx(it, body, done); } }, 'Je ne peux pas parler');
-  const status = h('p', { class: 'mute center' }, 'Appuie sur le micro et dis la phrase.');
-  let rec;
-  mic.onclick = () => {
-    mic.classList.add('rec'); status.textContent = 'Je t’écoute…'; let got = null;
-    rec = listen((alts) => { got = alts; }, () => {
-      mic.classList.remove('rec');
-      if (!got || !got.length) { status.textContent = 'Je n’ai rien entendu, réessaie.'; return; }
-      const best = Math.max(...got.map((a) => similarity(a, it.t)));
-      mic.disabled = true; skip.remove(); done(best >= 0.8, it.t, `J’ai compris : « ${got[0]} »`);
-    });
-  };
-  body.append(h('h2', {}, 'Dis cette phrase à voix haute'), h('div', { class: 'big' }, it.f), h('div', { class: 'center' }, mic), status,
+  let tries = 0;
+  const widget = pronounce(it.t, { intro: true, onResult: (r) => {
+    tries++;
+    if (r.score >= 0.65 || tries >= 2) { skip.remove(); widget.querySelector('.mic').disabled = true; done(r.score >= 0.65, it.t, `Prononciation : ${Math.round(r.score * 100)} % (compris : « ${r.heard} »)`); }
+    else { sfx('bad'); }
+  } });
+  body.append(h('h2', {}, 'Dis cette phrase à voix haute'), h('div', { class: 'big' }, it.f), h('div', { class: 'mute' }, '(tu as deux essais)'), widget,
     h('div', { class: 'footer' }, skip));
 }
 
@@ -347,7 +399,9 @@ function finish(e, it, body) {
       h('div', { class: 'sol mute' }, `${it.t} = ${it.f}`));
     const cont = h('button', { class: 'primary', onclick: () => { S.i++; next(); } }, 'Continuer');
     const foot = body.querySelector('.footer') || body.appendChild(h('div', { class: 'footer' }));
-    foot.replaceChildren(fb, h('div', { style: 'height:10px' }), cont);
+    const rep = (canListen() || canSpeak()) && e.step !== 3 ? h('details', { class: 'card pron-details' }, h('summary', {}, '🎤 Dis-la à voix haute'),
+      pronounce(it.t, { intro: false, onResult: (r) => { if (r.score >= 0.85) { sfx('ok'); react(dog, 'happy'); save.xp += 2; persist(); } else react(dog, 'sad', 1500); } })) : null;
+    foot.replaceChildren(...kids(fb, rep, h('div', { style: 'height:10px' }), cont));
     cont.focus();
     if (ok && canSpeak() && e.step !== 2) say(it.t);
   };

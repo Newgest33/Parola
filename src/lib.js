@@ -94,3 +94,36 @@ export function streak(days, now = Date.now()) {
   }
   return n;
 }
+
+/**
+ * Évalue une phrase prononcée à partir des transcriptions du micro (plusieurs hypothèses possibles).
+ * Alignement mot à mot (programmation dynamique) pour dire quels mots ont été reconnus.
+ * -> { score 0..1, heard, words: [{ w, ok }] }
+ */
+export function scoreSpeech(transcripts, target) {
+  const tWords = clean(target).split(' ').filter(Boolean);
+  let best = { score: 0, heard: '', words: tWords.map((w) => ({ w, ok: false })) };
+  for (const raw of transcripts || []) {
+    const hWords = clean(raw).split(' ').filter(Boolean);
+    const words = alignWords(tWords, hWords);
+    const okCount = words.filter((x) => x.ok).length;
+    // mélange : proportion de mots justes + similarité globale (tolère les découpages différents, ex. "buon giorno")
+    const score = 0.6 * (okCount / tWords.length) + 0.4 * similarity(raw, target);
+    if (score > best.score) best = { score, heard: raw, words };
+  }
+  return best;
+}
+
+function alignWords(t, h) {
+  const m = t.length, n = h.length;
+  const same = (a, b) => a === b || strip(a) === strip(b) || (a.length >= 4 && levenshtein(strip(a), strip(b)) <= 1);
+  const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+  for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++)
+    dp[i][j] = same(t[i - 1], h[j - 1]) ? dp[i - 1][j - 1] + 1 : Math.max(dp[i - 1][j], dp[i][j - 1]);
+  const ok = Array(m).fill(false);
+  for (let i = m, j = n; i > 0 && j > 0;) {
+    if (same(t[i - 1], h[j - 1])) { ok[i - 1] = true; i--; j--; }
+    else if (dp[i - 1][j] >= dp[i][j - 1]) i--; else j--;
+  }
+  return t.map((w, i) => ({ w, ok: ok[i] }));
+}

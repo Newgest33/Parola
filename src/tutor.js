@@ -46,6 +46,28 @@ export function trimHistory(messages) {
   return trimmed;
 }
 
+export const Coaching = z.object({
+  phonetic: z.string().describe('Prononciation approximative de la phrase complète écrite « à la française », syllabes séparées par des tirets, accent tonique en MAJUSCULES. Ex. italien « Come stai » -> « CO-mé STAÏ »'),
+  tips: z.array(z.string()).describe('1 à 3 conseils courts en français, ciblés sur les mots ratés : son difficile, lettre muette, accent tonique, liaison. Concret, pas de jargon'),
+});
+
+/** Conseil de prononciation à partir de la transcription du micro (pas d'audio : on raisonne sur l'écart texte). */
+export async function coachPronunciation({ lang, target, heard, missed }, { mock = process.env.PAROLA_TUTOR_MOCK === '1' } = {}) {
+  if (mock) return { phonetic: target.toUpperCase().split(' ').join(' - '), tips: missed.length ? [`Insiste sur « ${missed[0]} » : articule chaque syllabe.`] : ['Presque parfait : juste un peu plus lentement.'] };
+  client ??= new Anthropic();
+  const name = LANG_NAMES[lang] || lang;
+  const response = await client.beta.messages.create({
+    model: MODEL, max_tokens: 1024,
+    betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default',
+    output_config: { effort: 'low', format: zodOutputFormat(Coaching) },
+    system: [{ type: 'text', cache_control: { type: 'ephemeral' }, text: `Tu es Léo, coach de prononciation en ${name} pour un francophone débutant, dans l'application Parola.
+L'élève a lu une phrase à voix haute ; la reconnaissance vocale du navigateur a transcrit ce qu'elle a compris. Tu n'entends pas l'audio : tu déduis les sons probablement mal prononcés de l'écart entre la phrase cible et la transcription, et tu expliques comment produire ces sons avec des repères de français (ex. « gli » comme « lli » dans « million », « j » espagnol comme un « r » raclé, « ë » luxembourgeois comme le « e » de « le »). Reste bref, concret et encourageant. Ne mets jamais en cause le micro, sauf si la transcription n'a aucun rapport.` }],
+    messages: [{ role: 'user', content: `Phrase cible : « ${target} »\nTranscription du micro : « ${heard} »\nMots non reconnus : ${missed.length ? missed.join(', ') : 'aucun'}` }],
+  });
+  if (response.stop_reason === 'refusal') throw Object.assign(new Error('Pas de conseil possible pour cette phrase.'), { status: 422 });
+  return Coaching.parse(JSON.parse(response.content.filter((b) => b.type === 'text').map((b) => b.text).join('')));
+}
+
 let client;
 export async function askTutor({ lang, scenario, messages }, { mock = process.env.PAROLA_TUTOR_MOCK === '1' } = {}) {
   const history = trimHistory(messages);
