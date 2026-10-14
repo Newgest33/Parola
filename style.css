@@ -98,13 +98,14 @@ button.primary{transition:transform .1s,box-shadow .1s}
 .spitz{display:inline-block;vertical-align:middle;overflow:visible}
 .spitz *{transform-box:view-box}
 .spitz .sp-all{transform-origin:60px 110px}
-.spitz .sp-body{transform-origin:60px 108px;animation:sp-breathe 3.2s ease-in-out infinite}
+.spitz .sp-body{transform-origin:60px 103px;animation:sp-breathe 3.2s ease-in-out infinite}
+.spitz .sp-legs{transform-origin:60px 113px}
 .spitz .sp-head{transform-origin:60px 70px;animation:sp-tilt 6s ease-in-out infinite}
-.spitz .sp-tail{transform-origin:76px 70px;animation:sp-wag 1.1s ease-in-out infinite}
+.spitz .sp-tail{transform-origin:80px 62px;animation:sp-wag 1.1s ease-in-out infinite}
 .spitz .sp-lid{transform-origin:0 -5px;transform:scaleY(0);animation:sp-blink 4.4s infinite}
 .spitz .sp-eye:nth-of-type(2) .sp-lid{animation-delay:.05s}
-.spitz .sp-ear-l{transform-origin:44px 32px}.spitz .sp-ear-r{transform-origin:76px 32px;animation:sp-twitch 7s ease-in-out infinite}
-.spitz .sp-tongue{transform-origin:60px 60px;transform:scaleY(0);transition:transform .2s}
+.spitz .sp-ear-l{transform-origin:45px 32px}.spitz .sp-ear-r{transform-origin:73px 32px;animation:sp-twitch 7s ease-in-out infinite}
+.spitz .sp-tongue{transform-origin:59px 59px;transform:scaleY(0);transition:transform .2s}
 .spitz .sp-brows{opacity:0;transition:opacity .3s}
 .spitz .sp-shadow{transform-origin:60px 110px}
 /* content */
@@ -117,10 +118,10 @@ button.primary{transition:transform .1s,box-shadow .1s}
 .spitz.sad .sp-head{animation:none;transform:rotate(-6deg) translateY(4px)}
 .spitz.sad .sp-ear-l{transform:rotate(-50deg) translate(-3px,4px);transition:transform .4s}
 .spitz.sad .sp-ear-r{animation:none;transform:rotate(50deg) translate(3px,4px);transition:transform .4s}
-.spitz.sad .sp-tail{animation:none;transform:rotate(70deg) scale(.85);transition:transform .4s}
+.spitz.sad .sp-tail{animation:none;transform:rotate(75deg) scale(.8);transition:transform .4s}
 .spitz.sad .sp-brows{opacity:1}
-.spitz.sad .sp-brow-l{transform:rotate(14deg);transform-origin:50px 37px}.spitz.sad .sp-brow-r{transform:rotate(-14deg);transform-origin:70px 37px}
-.spitz.sad .sp-mouth{transform:translateY(3px) scaleY(-1);transform-origin:60px 59.5px}
+.spitz.sad .sp-brow-l{transform:rotate(14deg);transform-origin:47px 38px}.spitz.sad .sp-brow-r{transform:rotate(-14deg);transform-origin:71px 38px}
+.spitz.sad .sp-mouth{transform:translateY(3px) scaleY(-1);transform-origin:59px 59px}
 .spitz.sad .sp-blush{opacity:.2}
 /* danse */
 .spitz.dance .sp-all{animation:sp-dance .7s ease-in-out infinite}
