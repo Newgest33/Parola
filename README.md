@@ -42,7 +42,7 @@ en français, encouragement, et une suggestion de ce que tu pourrais dire (bouto
 
 ## Animations
 
-Léo le lion 🦁 (touche-le : il dit une phrase), confettis à partir de 3 bonnes réponses d'affilée, combo 🔥, secousse sur erreur,
+Léo, spitz allemand blanc en SVG animé (`src/mascot.js` : respiration, clignements, queue qui remue, oreilles, langue ; états happy / sad / dance — touche-le : il dit une phrase), confettis à partir de 3 bonnes réponses d'affilée, combo 🔥, secousse sur erreur,
 XP flottants, compteur d'XP animé, petits sons WebAudio (désactivables dans Réglages). Tout est coupé avec `prefers-reduced-motion`.
 
 ## Luxembourgeois

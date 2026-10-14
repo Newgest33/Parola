@@ -21,8 +21,8 @@ export function tutorView(d) {
         : '⚠️ Tuteur non configuré sur le serveur : il faut définir ANTHROPIC_API_KEY. Tu peux quand même explorer les scénarios.';
     }).catch(() => { st.textContent = '⚠️ Serveur injoignable : le tuteur a besoin de `npm start`.'; });
     return h('div', {},
-      h('div', { class: 'card' }, h('div', { class: 'row' }, h('span', { class: 'mascot idle', 'aria-hidden': 'true' }, '🦁'),
-        h('div', {}, h('b', {}, 'Parle avec Léo'), h('div', { class: 'mute' }, `Un vrai dialogue en ${L().name.toLowerCase()} : Léo joue un rôle, te répond, te corrige en douceur et te souffle quoi dire.`))), st),
+      h('div', { class: 'card' }, h('div', { class: 'row' }, d.mascot(72),
+        h('div', {}, h('b', {}, 'Parle avec Léo'), h('div', { class: 'mute' }, `Un vrai dialogue en ${L().name.toLowerCase()} : Léo le spitz joue un rôle, te répond, te corrige en douceur et te souffle quoi dire.`))), st),
       ...SCENARIOS.map((sc) => h('button', { class: 'unit', onclick: () => start(sc) },
         h('span', { class: 'emoji' }, sc.emoji), h('span', { class: 'grow' }, h('b', {}, sc.title), h('div', { class: 'mute' }, sc.brief)))));
   }
@@ -41,7 +41,7 @@ function chat(d, wrap, conv) {
 
   const view = h('div', { class: 'chat' },
     h('div', { class: 'row between' }, h('b', {}, `${sc.emoji} ${sc.title}`),
-      h('button', { class: 'x', onclick: () => { if (confirm('Terminer cette conversation ?')) { save.chat = null; persist(); wrap.replaceChildren(tutorView(d)); } } }, 'Terminer')),
+      d.twoStep('Terminer', 'Sûr ? Terminer', () => { save.chat = null; persist(); wrap.replaceChildren(tutorView(d)); })),
     log,
     h('div', { class: 'chatbar' }, input, h('div', { class: 'row' }, hint, mic, sendBtn)));
   for (const m of conv.messages) log.append(bubble(d, m));
@@ -92,7 +92,7 @@ function bubble(d, m) {
   const corr = (data.corrections || []).map((c) => h('div', { class: 'corr' }, h('s', {}, c.original), ' → ', h('b', {}, c.corrected), h('div', { class: 'mute' }, c.explanation)));
   const tr = h('div', { class: 'mute trans', hidden: true }, data.translation || '');
   return h('div', { class: 'msg bot' },
-    h('div', { class: 'row' }, h('span', { class: 'mascot', 'aria-hidden': 'true', style: 'font-size:1.4em' }, '🦁'), h('div', { class: 'grow' }, m.content),
+    h('div', { class: 'row' }, d.mascot(36, (m.data?.corrections?.length ? 'idle' : 'idle')), h('div', { class: 'grow' }, m.content),
       canSpeak() ? h('button', { class: 'x', 'aria-label': 'Écouter', onclick: () => say(m.content) }, '🔊') : null,
       data.translation ? h('button', { class: 'x', 'aria-label': 'Traduire', onclick: () => { tr.hidden = !tr.hidden; } }, '🇫🇷') : null),
     tr,

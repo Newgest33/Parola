@@ -1,5 +1,6 @@
 import { LANGS } from './content.js';
 import { tutorView } from './chat.js';
+import { mascot, react } from './mascot.js';
 import { confetti, floatText, sfx, bounce, fx } from './fx.js';
 import { checkTyped, review, newCard, mastery, shuffle, similarity, streak, dayKey, DAY, retention } from './lib.js';
 
@@ -77,18 +78,19 @@ function home() {
   mount(head, tabs, save.tab === 'stats' ? statsView() : save.tab === 'settings' ? settingsView() : save.tab === 'tutor' ? tutorView(tutorDeps()) : learnView(due, weak));
 }
 
-const CHEERS = ['Magnifique !', 'Roooar ! Parfait !', 'Tu gères !', 'Du premier coup !', 'Le lion est fier de toi 🦁', 'Ça, c’est du beau travail !', 'Incroyable !'];
-const OOPS = ['Aïe… mais on apprend !', 'Même un lion hésite parfois.', 'Pas grave, on y revient !', 'Ouille ! Je le note pour plus tard.'];
+const CHEERS = ['Magnifique !', 'Roooar ! Parfait !', 'Tu gères !', 'Du premier coup !', 'Léo est fier de toi !', 'Ça, c’est du beau travail !', 'Incroyable !'];
+const OOPS = ['Aïe… mais on apprend !', 'Même Léo se trompe de gamelle parfois.', 'Pas grave, on y revient !', 'Ouille ! Je le note pour plus tard.'];
 const pick = (a) => a[(Math.random() * a.length) | 0];
 function mascotBtn() {
-  const b = h('button', { class: 'mascot idle', 'aria-label': 'Léo la mascotte : touche-moi !', onclick: () => {
-    const it = pick(L().items); bounce(b); sfx('ok'); say(it.t);
-    const r = b.getBoundingClientRect(); floatText(it.t, r.left + r.width / 2, r.bottom + 10, 'var(--brand)');
-  } }, '🦁');
+  const dog = mascot(64);
+  const b = h('button', { class: 'mascot', 'aria-label': 'Léo le spitz : touche-moi !', onclick: () => {
+    const it = pick(L().items); react(dog, Math.random() < 0.25 ? 'dance' : 'happy', 1200); sfx('ok'); say(it.t);
+    const r = b.getBoundingClientRect(); floatText(Math.random() < 0.3 ? 'Wouf !' : it.t, r.left + r.width / 2, r.bottom + 10, 'var(--brand)');
+  } }, dog);
   return b;
 }
 
-const tutorDeps = () => ({ h, L, get save() { return save; }, persist, say, listen, canSpeak, canListen, sfx, confetti });
+const tutorDeps = () => ({ h, L, mascot, react, twoStep, get save() { return save; }, persist, say, listen, canSpeak, canListen, sfx, confetti });
 
 function learnView(due, weak) {
   const n = streak(save.days);
@@ -109,7 +111,7 @@ function learnView(due, weak) {
         h('div', { class: 'mute' }, `${s.known}/${u.items.length} appris`)));
   });
   const tutor = h('button', { class: 'unit tutorcta', onclick: () => { save.tab = 'tutor'; persist(); home(); } },
-    h('span', { class: 'emoji' }, '🦁'), h('span', { class: 'grow' }, h('b', {}, 'Parler avec Léo'), h('div', { class: 'mute' }, 'Jeu de rôle avec un tuteur IA qui te corrige en douceur.')));
+    h('span', { class: 'emoji' }, mascot(44)), h('span', { class: 'grow' }, h('b', {}, 'Parler avec Léo'), h('div', { class: 'mute' }, 'Jeu de rôle avec un tuteur IA qui te corrige en douceur.')));
   return h('div', {}, actions, tutor, h('p', { class: 'mute' }, 'Toutes les unités sont libres d’accès : aucun verrou, aucune vie à perdre.'), ...units);
 }
 
@@ -129,12 +131,23 @@ function statsView() {
     h('p', { class: 'mute' }, 'La « mémoire estimée » modélise l’oubli : réviser au bon moment, c’est retenir plus avec moins d’efforts.'));
 }
 
+/** Bouton de confirmation en deux temps (les boîtes de dialogue natives ne sont pas fiables partout). */
+function twoStep(label, confirmLabel, action) {
+  let armed = false, timer;
+  const b = h('button', { onclick: () => {
+    if (!armed) { armed = true; b.textContent = confirmLabel; b.classList.add('danger'); timer = setTimeout(() => { armed = false; b.textContent = label; b.classList.remove('danger'); }, 4000); return; }
+    clearTimeout(timer); action();
+  } }, label);
+  return b;
+}
+export { twoStep };
+
 function settingsView() {
   const goal = h('input', { type: 'number', min: 5, max: 100, value: save.goal, style: 'width:90px', 'aria-label': 'Objectif quotidien',
     onchange: (e) => { save.goal = Math.max(5, Math.min(100, +e.target.value || 15)); persist(); } });
   const file = h('input', { type: 'file', accept: 'application/json', hidden: true, onchange: async (e) => {
     try { const d = JSON.parse(await e.target.files[0].text()); if (!d.cards) throw 0; save = { ...defaults(), ...d }; persist(); home(); }
-    catch { alert('Fichier invalide.'); } } });
+    catch { floatText('Fichier invalide', innerWidth / 2, innerHeight / 2, 'var(--ko)'); } } });
   return h('div', {},
     h('div', { class: 'card row between' }, h('span', {}, 'Objectif quotidien (exercices)'), goal),
     h('div', { class: 'card' }, h('b', {}, 'Tes données t’appartiennent'),
@@ -144,7 +157,8 @@ function settingsView() {
           const a = h('a', { href: URL.createObjectURL(new Blob([JSON.stringify(save)], { type: 'application/json' })), download: 'parola-progression.json' });
           a.click(); } }, 'Exporter'),
         h('button', { onclick: () => file.click() }, 'Importer'), file,
-        h('button', { onclick: () => { if (confirm('Tout effacer ?')) { save = defaults(); persist(); home(); } } }, 'Réinitialiser'))),
+        h('button', { onclick: () => navigator.clipboard?.writeText(JSON.stringify(save)).then(() => floatText('Copié !', innerWidth / 2, innerHeight / 2, 'var(--ok)')).catch(() => {}) }, 'Copier'),
+        twoStep('Réinitialiser', 'Tout effacer, vraiment ?', () => { save = defaults(); persist(); home(); }))),
     h('div', { class: 'card row between' }, h('span', {}, '🔊 Effets sonores'),
       h('button', { 'aria-pressed': String(save.sound), onclick: (e) => { save.sound = !save.sound; fx.sound = save.sound; persist(); e.target.textContent = save.sound ? 'Activés' : 'Coupés'; e.target.setAttribute('aria-pressed', String(save.sound)); if (save.sound) sfx('ok'); } }, save.sound ? 'Activés' : 'Coupés')),
     h('p', { class: 'mute' }, canSpeak() ? '🔊 Synthèse vocale disponible.' : `🔇 Pas de voix pour ${L().name} sur cet appareil : l’écoute et la parole sont remplacées par l’écrit.`,
@@ -186,7 +200,7 @@ function next() {
   if (S.i >= S.queue.length) return summary();
   const e = S.queue[S.i];
   const bar = h('div', { class: 'topbar' },
-    h('button', { class: 'x', 'aria-label': 'Quitter', onclick: () => { if (confirm('Quitter la séance ? Ta progression est conservée.')) { speechSynthesis?.cancel(); home(); } } }, '✕'),
+    h('button', { class: 'x', 'aria-label': 'Quitter', onclick: () => { window.speechSynthesis?.cancel(); home(); } }, '✕'),
     h('div', { class: 'bar', role: 'progressbar', 'aria-valuenow': S.i, 'aria-valuemax': S.total }, h('i', { style: `width:${(S.i / S.total) * 100}%` })),
     S.combo >= 2 ? h('span', { class: 'combo', 'aria-label': `${S.combo} bonnes réponses d’affilée` }, `🔥 x${S.combo}`) : null);
   const body = h('div', { class: 'grow', style: 'display:flex;flex-direction:column' });
@@ -325,9 +339,10 @@ function finish(e, it, body) {
       S.queue.splice(Math.min(S.i + 4, S.queue.length), 0, { it, step: 0 });
       S.total = S.queue.length;
     }
-    const mascot = h('span', { class: 'mascot ' + (ok ? 'jump' : 'sad'), 'aria-hidden': 'true' }, ok ? '🦁' : '🙈');
+    const dog = mascot(52, ok ? 'happy' : 'sad');
+    if (ok) setTimeout(() => { dog.classList.remove('happy'); dog.classList.add('idle'); }, 900);
     const fb = h('div', { class: 'feedback ' + (ok ? 'good' : 'bad'), role: 'status' },
-      h('div', { class: 'row' }, mascot, h('b', { class: 'grow' }, ok ? pick(CHEERS) : pick(OOPS))),
+      h('div', { class: 'row' }, dog, h('b', { class: 'grow' }, ok ? pick(CHEERS) : pick(OOPS))),
       h('div', { class: 'sol' }, ok ? note : `Réponse : ${solution}`), !ok && note ? h('div', { class: 'sol' }, note) : null,
       h('div', { class: 'sol mute' }, `${it.t} = ${it.f}`));
     const cont = h('button', { class: 'primary', onclick: () => { S.i++; next(); } }, 'Continuer');
@@ -352,7 +367,7 @@ function summary() {
   const acc = S.firstTry.size ? Math.round((S.good / S.firstTry.size) * 100) : 0;
   const xpEl = h('b', {}, '+0 XP');
   mount(h('div', { class: 'center', style: 'margin-top:24px' },
-    h('div', { class: 'mascot dance', style: 'font-size:4em', 'aria-hidden': 'true' }, acc >= 80 ? '🦁' : acc >= 50 ? '😺' : '💪'),
+    h('div', {}, mascot(120, acc >= 80 ? 'dance' : acc >= 50 ? 'happy' : 'idle')),
     h('h1', {}, 'Séance terminée'),
     h('p', {}, `${acc} % de réussite du premier coup · `, xpEl)),
     S.wrong.length ? h('div', { class: 'card' }, h('b', {}, 'À retravailler (reviendra bientôt)'),
