@@ -1,0 +1,11 @@
+{
+  "name": "Parola",
+  "short_name": "Parola",
+  "description": "Apprendre une langue sans vies, sans pub, avec répétition espacée.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fffaf0",
+  "theme_color": "#e8590c",
+  "lang": "fr",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
