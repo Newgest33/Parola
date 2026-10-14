@@ -1,13 +1,15 @@
 import { LANGS } from './content.js';
+import { confetti, floatText, sfx, bounce, fx } from './fx.js';
 import { checkTyped, review, newCard, mastery, shuffle, similarity, streak, dayKey, DAY, retention } from './lib.js';
 
 /* ---------- état persistant (100 % local, exportable) ---------- */
 const KEY = 'parola.v1';
-const defaults = () => ({ lang: 'it', cards: {}, days: {}, xp: 0, goal: 15, tab: 'learn' });
+const defaults = () => ({ lang: 'it', cards: {}, days: {}, xp: 0, goal: 15, tab: 'learn', sound: true });
 let save;
 try { save = { ...defaults(), ...JSON.parse(localStorage.getItem(KEY) || '{}') }; } catch { save = defaults(); }
 const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch { /* stockage indisponible */ } };
 
+fx.sound = save.sound !== false;
 const root = document.getElementById('app');
 const L = () => LANGS[save.lang];
 const card = (id) => save.cards[id] || newCard();
@@ -28,10 +30,13 @@ function h(tag, props = {}, ...kids) {
 const mount = (...nodes) => { root.replaceChildren(...nodes); window.scrollTo(0, 0); };
 
 /* ---------- voix : synthèse + reconnaissance (si le navigateur le permet) ---------- */
-const canSpeak = 'speechSynthesis' in window;
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const hasTTS = 'speechSynthesis' in window;
+// Voix réellement disponible pour la langue courante (sinon exercices audio/parole désactivés)
+const canSpeak = () => hasTTS && !L().noVoice && (() => { const vs = speechSynthesis.getVoices(); return !vs.length || vs.some((v) => v.lang.replace('_', '-').startsWith(L().voice.slice(0, 2))); })();
+const canListen = () => !!SR && !L().noVoice;
 function say(text) {
-  if (!canSpeak) return;
+  if (!canSpeak()) return;
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = L().voice; u.rate = 0.9;
@@ -66,9 +71,20 @@ function home() {
       h('button', { class: save.tab === k ? 'on' : '', role: 'tab', 'aria-selected': String(save.tab === k),
         onclick: () => { save.tab = k; persist(); home(); } }, t)));
   const head = h('div', { class: 'row between' },
-    h('div', {}, h('h1', {}, 'Parola'), h('div', { class: 'row' }, ...langBtns)),
+    h('div', {}, h('div', { class: 'row' }, h('h1', {}, 'Parola'), mascotBtn()), h('div', { class: 'row wrap' }, ...langBtns)),
     h('div', { class: 'ring', style: `--p:${pct}`, title: 'Objectif du jour' }, h('span', {}, `${Math.min(today(), save.goal)}/${save.goal}`)));
   mount(head, tabs, save.tab === 'stats' ? statsView() : save.tab === 'settings' ? settingsView() : learnView(due, weak));
+}
+
+const CHEERS = ['Magnifique !', 'Roooar ! Parfait !', 'Tu gères !', 'Du premier coup !', 'Le lion est fier de toi 🦁', 'Ça, c’est du beau travail !', 'Incroyable !'];
+const OOPS = ['Aïe… mais on apprend !', 'Même un lion hésite parfois.', 'Pas grave, on y revient !', 'Ouille ! Je le note pour plus tard.'];
+const pick = (a) => a[(Math.random() * a.length) | 0];
+function mascotBtn() {
+  const b = h('button', { class: 'mascot idle', 'aria-label': 'Léo la mascotte : touche-moi !', onclick: () => {
+    const it = pick(L().items); bounce(b); sfx('ok'); say(it.t);
+    const r = b.getBoundingClientRect(); floatText(it.t, r.left + r.width / 2, r.bottom + 10, 'var(--brand)');
+  } }, '🦁');
+  return b;
 }
 
 function learnView(due, weak) {
@@ -124,8 +140,10 @@ function settingsView() {
           a.click(); } }, 'Exporter'),
         h('button', { onclick: () => file.click() }, 'Importer'), file,
         h('button', { onclick: () => { if (confirm('Tout effacer ?')) { save = defaults(); persist(); home(); } } }, 'Réinitialiser'))),
-    h('p', { class: 'mute' }, canSpeak ? '🔊 Synthèse vocale disponible.' : '🔇 Synthèse vocale indisponible : les exercices d’écoute sont désactivés.',
-      SR ? ' 🎤 Reconnaissance vocale disponible.' : ' 🎤 Reconnaissance vocale indisponible sur ce navigateur.'));
+    h('div', { class: 'card row between' }, h('span', {}, '🔊 Effets sonores'),
+      h('button', { 'aria-pressed': String(save.sound), onclick: (e) => { save.sound = !save.sound; fx.sound = save.sound; persist(); e.target.textContent = save.sound ? 'Activés' : 'Coupés'; e.target.setAttribute('aria-pressed', String(save.sound)); if (save.sound) sfx('ok'); } }, save.sound ? 'Activés' : 'Coupés')),
+    h('p', { class: 'mute' }, canSpeak() ? '🔊 Synthèse vocale disponible.' : `🔇 Pas de voix pour ${L().name} sur cet appareil : l’écoute et la parole sont remplacées par l’écrit.`,
+      canListen() ? ' 🎤 Reconnaissance vocale disponible.' : ' 🎤 Reconnaissance vocale indisponible.'));
 }
 
 /* ---------- construction d'une séance ---------- */
@@ -155,7 +173,7 @@ let S; // séance courante
 function startSession(scope) {
   const queue = buildQueue(scope);
   if (!queue.length) return home();
-  S = { queue, i: 0, scope, total: queue.length, firstTry: new Set(), wrong: [], good: 0, xp: 0 };
+  S = { queue, i: 0, scope, total: queue.length, firstTry: new Set(), wrong: [], good: 0, xp: 0, combo: 0 };
   next();
 }
 
@@ -164,7 +182,8 @@ function next() {
   const e = S.queue[S.i];
   const bar = h('div', { class: 'topbar' },
     h('button', { class: 'x', 'aria-label': 'Quitter', onclick: () => { if (confirm('Quitter la séance ? Ta progression est conservée.')) { speechSynthesis?.cancel(); home(); } } }, '✕'),
-    h('div', { class: 'bar', role: 'progressbar', 'aria-valuenow': S.i, 'aria-valuemax': S.total }, h('i', { style: `width:${(S.i / S.total) * 100}%` })));
+    h('div', { class: 'bar', role: 'progressbar', 'aria-valuenow': S.i, 'aria-valuemax': S.total }, h('i', { style: `width:${(S.i / S.total) * 100}%` })),
+    S.combo >= 2 ? h('span', { class: 'combo', 'aria-label': `${S.combo} bonnes réponses d’affilée` }, `🔥 x${S.combo}`) : null);
   const body = h('div', { class: 'grow', style: 'display:flex;flex-direction:column' });
   mount(bar, body);
   const run = () => exercise(e, body);
@@ -175,7 +194,7 @@ function introCard(it, body, go) {
   say(it.t);
   body.append(h('p', { class: 'mute' }, 'Nouvelle phrase'),
     h('div', { class: 'card center' }, h('div', { class: 'big' }, it.t), h('div', {}, it.f),
-      canSpeak ? h('button', { class: 'speak', 'aria-label': 'Écouter', onclick: () => say(it.t) }, '🔊') : null),
+      canSpeak() ? h('button', { class: 'speak', 'aria-label': 'Écouter', onclick: () => say(it.t) }, '🔊') : null),
     h('div', { class: 'footer' }, h('button', { class: 'primary', onclick: go }, 'Compris')));
 }
 
@@ -186,8 +205,8 @@ function exercise(e, body) {
   let type;
   if (step === 0) type = 'mc-recognise';
   else if (step === 1) type = words >= 2 ? 'build' : 'mc-produce';
-  else if (step === 2) type = canSpeak ? 'listen' : 'type';
-  else type = SR && Math.random() < 0.3 ? 'speak' : 'type';
+  else if (step === 2) type = canSpeak() ? 'listen' : 'type';
+  else type = canListen() && Math.random() < 0.3 ? 'speak' : 'type';
   ({ 'mc-recognise': mcRecognise, 'mc-produce': mcProduce, build, listen: listenEx, type: typeEx, speak: speakEx })[type](it, body, finish(e, it, body));
 }
 
@@ -212,7 +231,7 @@ function choices(body, prompt, hear, answer, opts, done, audio) {
   } }, 'Vérifier');
   function pick(k) { if (locked) return; picked = k; btns.forEach((b, j) => b.classList.toggle('sel', j === k)); check.disabled = false; }
   body.append(h('h2', {}, prompt),
-    hear ? h('div', { class: 'row' }, h('div', { class: 'big grow' }, hear), audio && canSpeak ? h('button', { class: 'speak', 'aria-label': 'Écouter', onclick: () => say(hear) }, '🔊') : null) : null,
+    hear ? h('div', { class: 'row' }, h('div', { class: 'big grow' }, hear), audio && canSpeak() ? h('button', { class: 'speak', 'aria-label': 'Écouter', onclick: () => say(hear) }, '🔊') : null) : null,
     h('div', { class: 'options' }, ...btns), h('div', { class: 'footer', id: 'foot' }, check));
   keys((n) => n < opts.length && pick(n), () => !check.disabled && check.click());
 }
@@ -291,8 +310,9 @@ function finish(e, it, body) {
     if (first) { // seule la 1re tentative compte pour la mémoire : une réponse "réparée" ne prouve rien
       S.firstTry.add(it.id);
       save.cards[it.id] = review(card(it.id), ok);
-      if (ok) { S.good++; S.xp += 10; } else { S.xp += 2; S.wrong.push(it); }
+      if (ok) { S.good++; S.xp += 10; S.combo++; } else { S.xp += 2; S.wrong.push(it); S.combo = 0; }
     }
+    celebrate(ok, first, body);
     save.xp += ok && first ? 10 : first ? 2 : 0;
     save.days[dayKey(Date.now())] = today() + 1;
     persist();
@@ -300,27 +320,42 @@ function finish(e, it, body) {
       S.queue.splice(Math.min(S.i + 4, S.queue.length), 0, { it, step: 0 });
       S.total = S.queue.length;
     }
+    const mascot = h('span', { class: 'mascot ' + (ok ? 'jump' : 'sad'), 'aria-hidden': 'true' }, ok ? '🦁' : '🙈');
     const fb = h('div', { class: 'feedback ' + (ok ? 'good' : 'bad'), role: 'status' },
-      h('b', {}, ok ? ['Bien joué !', ' ✓'] : 'Pas tout à fait'),
+      h('div', { class: 'row' }, mascot, h('b', { class: 'grow' }, ok ? pick(CHEERS) : pick(OOPS))),
       h('div', { class: 'sol' }, ok ? note : `Réponse : ${solution}`), !ok && note ? h('div', { class: 'sol' }, note) : null,
       h('div', { class: 'sol mute' }, `${it.t} = ${it.f}`));
     const cont = h('button', { class: 'primary', onclick: () => { S.i++; next(); } }, 'Continuer');
     const foot = body.querySelector('.footer') || body.appendChild(h('div', { class: 'footer' }));
     foot.replaceChildren(fb, h('div', { style: 'height:10px' }), cont);
     cont.focus();
-    if (ok && canSpeak && e.step !== 2) say(it.t);
+    if (ok && canSpeak() && e.step !== 2) say(it.t);
   };
+}
+
+function celebrate(ok, first, body) {
+  const foot = body.querySelector('.footer'), r = (foot || body).getBoundingClientRect();
+  const x = r.left + r.width / 2, y = Math.min(r.top, innerHeight - 120);
+  if (ok) {
+    sfx('ok');
+    if (first) floatText('+10 XP', x, y, 'var(--ok)');
+    if (S.combo >= 3) { confetti(S.combo >= 5 ? 70 : 30, x, y); if (S.combo === 3 || S.combo === 5) floatText(`🔥 combo x${S.combo} !`, x, y - 40, 'var(--brand)'); }
+  } else { sfx('bad'); bounce(body, 'shake'); }
 }
 
 function summary() {
   const acc = S.firstTry.size ? Math.round((S.good / S.firstTry.size) * 100) : 0;
+  const xpEl = h('b', {}, '+0 XP');
   mount(h('div', { class: 'center', style: 'margin-top:24px' },
-    h('div', { style: 'font-size:3em' }, acc >= 80 ? '🎉' : acc >= 50 ? '👍' : '💪'),
+    h('div', { class: 'mascot dance', style: 'font-size:4em', 'aria-hidden': 'true' }, acc >= 80 ? '🦁' : acc >= 50 ? '😺' : '💪'),
     h('h1', {}, 'Séance terminée'),
-    h('p', {}, `${acc} % de réussite du premier coup · +${S.xp} XP`)),
+    h('p', {}, `${acc} % de réussite du premier coup · `, xpEl)),
     S.wrong.length ? h('div', { class: 'card' }, h('b', {}, 'À retravailler (reviendra bientôt)'),
       ...S.wrong.map((w) => h('div', {}, `${w.t} — `, h('span', { class: 'mute' }, w.f)))) : h('div', { class: 'card center' }, 'Sans-faute ! 🌟'),
     h('div', { class: 'footer' }, h('button', { class: 'primary', onclick: home }, 'Terminer')));
+  if (acc >= 50) { sfx('win'); confetti(90, innerWidth / 2, innerHeight * 0.3); setTimeout(() => confetti(60, innerWidth * 0.25, innerHeight * 0.35), 350); setTimeout(() => confetti(60, innerWidth * 0.75, innerHeight * 0.35), 600); }
+  let t0 = null; const tick = (t) => { t0 ??= t; const k = Math.min(1, (t - t0) / 900); xpEl.textContent = `+${Math.round(S.xp * k)} XP`; if (k < 1) requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
 }
 
 home();

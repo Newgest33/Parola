@@ -51,6 +51,31 @@ export const LANGS = {
         ['Busco una farmacia', 'Je cherche une pharmacie'], ['Me he perdido', 'Je me suis perdu'], ['¿Puede ayudarme?', 'Pouvez-vous m’aider ?'] ] },
     ],
   },
+  lb: {
+    name: 'Luxembourgeois', flag: '🇱🇺', voice: 'lb-LU', noVoice: true, // pas de voix lb dans les navigateurs : exercices audio désactivés
+    units: [
+      { id: 'lb1', title: 'Premiers mots', emoji: '👋', items: [
+        ['Moien', 'Salut'], ['Gudde Moien', 'Bonjour'], ['Gudden Owend', 'Bonsoir'], ['Merci villmools', 'Merci beaucoup'],
+        ['Gär geschitt', 'Je vous en prie'], ['Wann ech gelift', "S'il vous plaît"], ['Et deet mir leed', 'Je suis désolé'],
+        ['Wéi geet et?', 'Comment vas-tu ?'], ['Et geet mir gutt, merci', 'Je vais bien, merci'], ['Äddi', 'Au revoir'] ] },
+      { id: 'lb2', title: 'Se présenter', emoji: '🙋', items: [
+        ['Ech heeschen Luc', "Je m'appelle Luc"], ['Et freet mech', 'Enchanté'], ['Wou kënns du hier?', "D'où viens-tu ?"],
+        ['Ech sinn Fransous', 'Je suis français'], ['Schwätz du Englesch?', 'Parles-tu anglais ?'], ['Ech verstinn net', 'Je ne comprends pas'],
+        ['Schwätz w.e.g. méi lues', 'Parle plus lentement, s’il te plaît'], ['Ech wunnen zu Paräis', "J'habite à Paris"],
+        ['Ech sinn fënnefanzwanzeg Joer al', "J'ai vingt-cinq ans"], ['Ech léieren Lëtzebuergesch', "J'apprends le luxembourgeois"] ] },
+      { id: 'lb3', title: 'Au restaurant', emoji: '🍺', items: [
+        ['En Dësch fir zwee', 'Une table pour deux'], ["D'Kaart, wann ech gelift", "La carte, s'il vous plaît"],
+        ['Ech hätt gär e Béier', 'Je voudrais une bière'], ['Ech hätt gär Gromperekichelcher', 'Je voudrais des galettes de pommes de terre'],
+        ['Wat proposéiert Dir mir?', 'Que me conseillez-vous ?'], ['E Glas roude Wäin', 'Un verre de vin rouge'],
+        ['E Glas Waasser', "Un verre d'eau"], ["D'Rechnung, wann ech gelift", "L'addition, s'il vous plaît"],
+        ['Et war ganz lecker', "C'était délicieux"], ['Ech sinn Vegetarier', 'Je suis végétarien'] ] },
+      { id: 'lb4', title: 'En ville', emoji: '🗺️', items: [
+        ['Wou ass de Bahnhof?', 'Où est la gare ?'], ['Gitt riets', 'Tournez à droite'], ['Gitt riicht aus', 'Allez tout droit'],
+        ['Lénks', 'À gauche'], ['Wéi vill kascht d’Ticket?', 'Combien coûte le billet ?'], ['Wéini fiert den Zuch?', 'Quand part le train ?'],
+        ['Ass et wäit vun hei?', "C'est loin d'ici ?"], ['Ech sichen eng Apdikt', 'Je cherche une pharmacie'],
+        ['Ech sinn verluer gaangen', 'Je me suis perdu'], ['Kënnt Dir mir hëllefen?', 'Pouvez-vous m’aider ?'] ] },
+    ],
+  },
 };
 
 // Normalisation : chaque item reçoit un id stable "unit:index"

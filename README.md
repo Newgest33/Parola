@@ -1,6 +1,6 @@
 # Parola
 
-Application d'apprentissage des langues (italien et espagnol pour francophones), pensée comme une alternative à Duolingo.
+Application d'apprentissage des langues (italien, espagnol et luxembourgeois pour francophones), pensée comme une alternative à Duolingo.
 PWA sans dépendances : fonctionne hors ligne, aucun compte, aucune pub, aucun pistage.
 
 ## Lancer
@@ -25,10 +25,21 @@ node tests/e2e.mjs http://localhost:8080   # parcours complet dans Chromium (pla
 | Données captives | Tout en local, export/import JSON de la progression |
 | Écoute impossible dans le métro | Bouton « Je ne peux pas écouter / parler » : l'exercice est remplacé sans pénalité |
 
+## Animations
+
+Léo le lion 🦁 (touche-le : il dit une phrase), confettis à partir de 3 bonnes réponses d'affilée, combo 🔥, secousse sur erreur,
+XP flottants, compteur d'XP animé, petits sons WebAudio (désactivables dans Réglages). Tout est coupé avec `prefers-reduced-motion`.
+
+## Luxembourgeois
+
+Aucun navigateur n'a de voix luxembourgeoise : pour cette langue, écoute et parole sont remplacées par des exercices écrits.
+Le contenu doit être relu par un locuteur natif avant diffusion.
+
 ## Architecture
 
 - `src/lib.js` — logique pure : normalisation, distance d'édition, SRS, mémoire estimée, série.
 - `src/content.js` — contenu. Ajouter une langue ou une unité = ajouter des paires `[cible, français]`.
+- `src/fx.js` — confettis, texte flottant, sons.
 - `src/app.js` — interface (DOM sans `innerHTML`), séances, exercices, synthèse/reconnaissance vocale (Web Speech API).
 - `sw.js` + `manifest.webmanifest` — installable et utilisable hors ligne.
 
