@@ -1,0 +1,7 @@
+frame 0/900 t=0.0s elapsed=0s
+frame 150/900 t=5.0s elapsed=13s
+frame 300/900 t=10.0s elapsed=23s
+frame 450/900 t=15.0s elapsed=33s
+frame 600/900 t=20.0s elapsed=44s
+frame 750/900 t=25.0s elapsed=62s
+done video-silent.mp4

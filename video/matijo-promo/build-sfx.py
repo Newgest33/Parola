@@ -2,11 +2,13 @@
 """Build sfx.wav (30 s) from the Pixabay-licensed effects bundled with the media-use skill."""
 import sys, subprocess, pathlib
 S = sys.argv[1] if len(sys.argv) > 1 else str(pathlib.Path(__file__).resolve().parents[2] / '.claude/skills/media-use/audio/assets/sfx')
-cues=[("pop",0.3,.5),("pop",1.1,.5),("pop",1.9,.5),("whoosh-short",2.7,.5),("whoosh-short",3.4,.7),("impact-bass-1",4.3,.6),
-("whoosh-short",6.0,.6),("typing",6.7,.35),("typing",7.3,.35),("pop",8.5,.45),("click-soft",8.8,.7),
-("whoosh-short",9.6,.6),("pop",10.3,.4),("pop",10.7,.4),("pop",11.1,.4),("pop",11.5,.4),("pop",11.9,.4),("notification",12.6,.45),("pop",13.3,.45),("pop",14.0,.45),
-("whoosh-short",16.5,.6),("pop",17.0,.4),("pop",17.4,.4),("pop",17.8,.4),("click-soft",19.4,.8),("chime",20.8,.55),("pop",22.2,.3),
-("whoosh-short",23.5,.6),("impact-bass-1",23.7,.6),("sparkle",24.6,.5),("pop",25.8,.5)]
+if not pathlib.Path(S).is_dir():  # fallback: synthesized effects (python3 synth-sfx.py sfx-synth)
+    S = str(pathlib.Path(__file__).resolve().parent / 'sfx-synth')
+cues=[("pop",0.4,.5),("pop",1.9,.5),("pop",3.2,.5),("whoosh-short",4.0,.5),("whoosh-short",4.45,.7),("impact-bass-1",5.6,.6),
+("whoosh-short",6.6,.6),("typing",7.1,.35),("typing",7.7,.35),("pop",8.8,.45),("click-soft",9.4,.7),
+("whoosh-short",9.75,.6),("pop",10.25,.45),("pop",10.95,.45),("pop",11.65,.45),("notification",12.5,.45),("pop",13.15,.4),("pop",14.15,.4),("pop",15.0,.4),("pop",15.65,.4),("pop",16.2,.4),
+("whoosh-short",16.9,.6),("pop",17.4,.4),("pop",17.8,.4),("pop",18.2,.4),("click-soft",20.3,.8),("chime",22.3,.55),("pop",22.7,.3),
+("whoosh-short",23.2,.6),("impact-bass-1",23.4,.6),("sparkle",24.05,.5),("pop",26.4,.5)]
 args=["ffmpeg","-y","-hide_banner","-loglevel","error"]; fc=[]
 for i,(n,t,v) in enumerate(cues):
     args+=["-i",f"{S}/{n}.mp3"]; ms=int(t*1000)
